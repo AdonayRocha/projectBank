@@ -1,0 +1,29 @@
+Criar uma nova conta
+Tipo: POST
+Endpoint: http://localhost:8080/conta
+Body:
+{
+    "numeroConta": "12345",
+    "numeroAgencia": "6789",
+    "nomeTitular": "Fulano de Tal",
+    "dataAbertura": "2023-10-01",
+    "cpfTitular": "123.456.789-00",
+    "saldo": 1000.0,
+    "ativo": true,
+    "tipoConta": "corrente"
+}
+2. Listar todas as contas
+Tipo: GET
+Endpoint: http://localhost:8080/conta
+
+3. Obter detalhes de uma conta específica
+Tipo: GET
+Endpoint: http://localhost:8080/conta/{numeroConta}
+
+4. Realizar um depósito em uma conta
+Tipo: PUT
+Endpoint: http://localhost:8080/conta/{numeroConta}/deposito/{valor}
+
+Colab
+Tipo: GET
+Endpoint: http://localhost:8080/

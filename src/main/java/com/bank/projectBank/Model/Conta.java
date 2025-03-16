@@ -23,6 +23,10 @@ public class Conta {
         this.tipoConta = tipo;
     }
 
+    public void deposito(double valor) {
+        this.saldo += valor;
+    }
+
     // Getters and Setters
     public String getNumeroConta() {
         return numeroConta;
