@@ -1,6 +1,5 @@
 package com.bank.projectBank.Model;
 
-import java.util.Date;
 import java.time.LocalDate;
 
 public class Conta {
