@@ -19,6 +19,7 @@ public class ContaController {
     @Autowired
     private contaRepository repository;
 
+    // Criar conta
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Conta conta) {
         if (conta.getNomeTitular() == null || conta.getNomeTitular().isEmpty()) {
@@ -35,17 +36,22 @@ public class ContaController {
                 !conta.getTipoConta().equalsIgnoreCase("salario")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("O tipo de conta deve ser: Corrente, poupança ou salário");
         }
+        if (repository.getNumeroConta(conta.getNumeroConta()) != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Já existe uma conta com este número");
+        }
 
         repository.salvar(conta);
         return ResponseEntity.status(HttpStatus.CREATED).body(conta);
     }
-
+    
+    // Retorna todas as contas
     @GetMapping
     public ResponseEntity<List<Conta>> getContas() {
         List<Conta> contas = repository.getContas();
         return ResponseEntity.ok(contas);
     }
 
+    // Retorna a conta pelo ID [Numero da conta]
     @GetMapping("/{numeroConta}")
     public ResponseEntity<?> getConta(@PathVariable String numeroConta) {
         Conta conta = repository.getNumeroConta(numeroConta);
@@ -55,6 +61,7 @@ public class ContaController {
         return ResponseEntity.ok(conta);
     }
 
+    // Retorna a conta pelo CPF do titular
     @GetMapping("/cpf/{cpfTitular}")
     public ResponseEntity<?> getContaByCpf(@PathVariable String cpfTitular) {
         Conta conta = repository.getCpfTitularConta(cpfTitular);
@@ -64,6 +71,7 @@ public class ContaController {
         return ResponseEntity.ok(conta);
     }
 
+    // Faz depósito na conta
     @PutMapping("/deposito")
     public ResponseEntity<?> deposito(@RequestBody Conta depositoRequest) {
         Conta conta = repository.getNumeroConta(depositoRequest.getNumeroConta());
@@ -74,6 +82,7 @@ public class ContaController {
         return ResponseEntity.ok(conta);
     }
 
+    // Faz saque na conta
     @PutMapping("/saque")
     public ResponseEntity<?> saque(@RequestBody Conta saqueRequest) {
         Conta conta = repository.getNumeroConta(saqueRequest.getNumeroConta());
@@ -87,6 +96,7 @@ public class ContaController {
         return ResponseEntity.ok(conta);
     }
 
+    // Encerra uma conta
     @PutMapping("/encerrar/{numeroConta}")
     public ResponseEntity<?> encerrarConta(@PathVariable String numeroConta) {
         Conta conta = repository.getNumeroConta(numeroConta);
@@ -100,6 +110,7 @@ public class ContaController {
         return ResponseEntity.ok(conta);
     }
 
+    // Faz pix  [Transferência entre contas]
     @PostMapping("/pix")
     public ResponseEntity<?> realizarPix(@RequestBody Map<String, Object> pixRequest) {
         String numeroContaOrigem = (String) pixRequest.get("numeroContaOrigem");
