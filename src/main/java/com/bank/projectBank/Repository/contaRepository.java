@@ -16,13 +16,18 @@ public class contaRepository {
     }
 
     public Conta getNumeroConta(String numeroConta) {
-        return contas.stream().filter(c -> c.getNumeroConta().equals(numeroConta)).findFirst().orElse(null);
+        return contas.stream()
+                .filter(c -> c.getNumeroConta().equals(numeroConta))
+                .findFirst()
+                .orElse(null);
     }
     
     public Conta getCpfTitularConta(String cpfTitular) {
-        return contas.stream().filter(c -> c.getCpfTitular().equals(cpfTitular)).findFirst().orElse(null);
+        return contas.stream()
+                    .filter(c -> c.getCpfTitular().equals(cpfTitular))
+                    .findFirst()
+                    .orElse(null);
     }
-
     public void salvar(Conta conta) {
         contas.add(conta);
     }

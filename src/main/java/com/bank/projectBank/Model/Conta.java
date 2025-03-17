@@ -27,6 +27,13 @@ public class Conta {
         this.saldo += valor;
     }
 
+    public void saque(double valor) {
+        if (valor > 0 && this.saldo >= valor) {
+            this.saldo -= valor;
+        } else {
+            throw new IllegalArgumentException("Saldo insuficiente ou valor inválido");
+        }
+    }
     // Getters and Setters
     public String getNumeroConta() {
         return numeroConta;
@@ -90,5 +97,13 @@ public class Conta {
 
     public void setTipoConta(String tipoConta) {
         this.tipoConta = tipoConta;
+    }
+
+    public double getSaque() {
+        return this.saldo;
+    }
+
+    public void setSaque(double valor) {
+        saque(valor);
     }
 }

@@ -1,32 +1,59 @@
 #apiUse
 
-Criar uma nova conta
-Tipo: POST
+Criar nova contaTipo: POST
 Endpoint: http://localhost:8080/conta
 Body:
 {
-    "numeroConta": "12345",
-    "numeroAgencia": "6789",
-    "nomeTitular": "Fulano de Tal",
-    "dataAbertura": "2023-10-01",
-    "cpfTitular": "123.456.789-00",
-    "saldo": 1000.0,
-    "ativo": true,
-    "tipoConta": "corrente"
+  "numeroConta": "12345",
+  "numeroAgencia": "6789",
+  "nomeTitular": "Fulano de Tal",
+  "dataAbertura": "2023-10-01",
+  "cpfTitular": "123.456.789-00",
+  "saldo": 1000.0,
+  "ativo": true,
+  "tipoConta": "corrente"
 }
 
-Listar todas as contas
+Listar todas contas
 Tipo: GET
 Endpoint: http://localhost:8080/conta
 
-Obter detalhes de uma conta específica
+Detalhes - ID
 Tipo: GET
 Endpoint: http://localhost:8080/conta/{numeroConta}
 
-Realizar um depósito em uma conta
-Tipo: PUT
-Endpoint: http://localhost:8080/conta/{numeroConta}/deposito/{valor}
-
-Colab
+Detalhes - CPF
 Tipo: GET
-Endpoint: http://localhost:8080/
+Endpoint: http://localhost:8080/conta/cpf/{cpfTitular}
+
+Depósito 
+Tipo: PUT
+Endpoint: http://localhost:8080/conta/deposito
+Body:
+{
+  "numeroConta": "12345",
+  "saldo": 500.0
+}
+
+Saque
+Tipo: PUT
+Endpoint: http://localhost:8080/conta/saque
+Body:
+{
+  "numeroConta": "12345",
+  "saldo": 200.0
+}
+
+Encerrar uma conta
+Tipo: PUT
+Endpoint: http://localhost:8080/conta/encerrar/{numeroConta}
+
+PIX
+Tipo: POST
+Endpoint: http://localhost:8080/conta/pix
+Body:
+{
+  "numeroContaOrigem": "12345",
+  "numeroContaDestino": "67890",
+  "valor": 200.0
+}
