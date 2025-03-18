@@ -11,7 +11,7 @@ public class Conta {
     private double saldo;
     private Boolean ativo; // Ativo = True/ Desativado = False
     private String tipoConta;
-    
+
     public Conta(String numero, String agencia, String nome, LocalDate data, String cpf, double saldo, Boolean ativo, String tipo) {
         this.numeroConta = numero;
         this.numeroAgencia = agencia;
@@ -23,18 +23,64 @@ public class Conta {
         this.tipoConta = tipo;
     }
 
+    // Validação da conta
+    public void validarConta() {
+        if (this.nomeTitular == null || this.nomeTitular.isEmpty()) {
+            throw new IllegalArgumentException("Nome do titular é obrigatório");
+        }
+        if (this.cpfTitular == null || this.cpfTitular.isEmpty()) {
+            throw new IllegalArgumentException("CPF do titular é obrigatório");
+        }
+        if (this.dataAbertura == null || this.dataAbertura.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Data de abertura deve ser hoje ou antes");
+        }
+        if (!this.tipoConta.equalsIgnoreCase("corrente") &&
+                !this.tipoConta.equalsIgnoreCase("poupanca") &&
+                !this.tipoConta.equalsIgnoreCase("salario")) {
+            throw new IllegalArgumentException("O tipo de conta deve ser: Corrente, poupança ou salário");
+        }
+    }
+
+    // Depósito
     public void deposito(double valor) {
+        if (valor <= 0) {
+            throw new IllegalArgumentException("Valor de depósito deve ser positivo");
+        }
         this.saldo += valor;
     }
 
+    // Saque
     public void saque(double valor) {
-        if (valor > 0 && this.saldo >= valor) {
-            this.saldo -= valor;
-        } else {
-            throw new IllegalArgumentException("Saldo insuficiente ou valor inválido");
+        if (valor <= 0) {
+            throw new IllegalArgumentException("Valor de saque deve ser positivo");
         }
+        if (this.saldo < valor) {
+            throw new IllegalArgumentException("Saldo insuficiente para realizar o saque");
+        }
+        this.saldo -= valor;
     }
-    // Getters and Setters
+
+    // PIX (Transferência entre contas)
+    public void realizarPix(Conta contaDestino, double valor) {
+        if (contaDestino == null) {
+            throw new IllegalArgumentException("Conta de destino não encontrada");
+        }
+        if (this.saldo < valor) {
+            throw new IllegalArgumentException("Saldo insuficiente para realizar o PIX");
+        }
+        this.saque(valor);
+        contaDestino.deposito(valor);
+    }
+
+    // Encerrar conta
+    public void encerrarConta() {
+        if (!this.ativo) {
+            throw new IllegalArgumentException("A conta já está encerrada");
+        }
+        this.ativo = false;
+    }
+
+    // Getters e Setters
     public String getNumeroConta() {
         return numeroConta;
     }
@@ -97,13 +143,5 @@ public class Conta {
 
     public void setTipoConta(String tipoConta) {
         this.tipoConta = tipoConta;
-    }
-
-    public double getSaque() {
-        return this.saldo;
-    }
-
-    public void setSaque(double valor) {
-        saque(valor);
     }
 }

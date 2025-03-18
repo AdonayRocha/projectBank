@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,36 +21,29 @@ public class ContaController {
     // Criar conta
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Conta conta) {
-        if (conta.getNomeTitular() == null || conta.getNomeTitular().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Nome do titular é obrigatório");
+        try {
+            conta.validarConta();
+            if (repository.getNumeroConta(conta.getNumeroConta()) != null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Já existe uma conta com este número");
+            }
+            repository.salvar(conta);
+            return ResponseEntity.status(HttpStatus.CREATED).body(conta);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-        if (conta.getCpfTitular() == null || conta.getCpfTitular().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CPF do titular é obrigatório");
-        }
-        if (conta.getDataAbertura() == null || conta.getDataAbertura().isAfter(LocalDate.now())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Data de abertura deve ser hoje ou antes");
-        }
-        if (!conta.getTipoConta().equalsIgnoreCase("corrente") &&
-                !conta.getTipoConta().equalsIgnoreCase("poupanca") &&
-                !conta.getTipoConta().equalsIgnoreCase("salario")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("O tipo de conta deve ser: Corrente, poupança ou salário");
-        }
-        if (repository.getNumeroConta(conta.getNumeroConta()) != null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Já existe uma conta com este número");
-        }
-
-        repository.salvar(conta);
-        return ResponseEntity.status(HttpStatus.CREATED).body(conta);
     }
-    
+
     // Retorna todas as contas
-    @GetMapping
-    public ResponseEntity<List<Conta>> getContas() {
+    @GetMapping("/contas")
+    public ResponseEntity<?> getContas() {
         List<Conta> contas = repository.getContas();
+        if (contas.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nenhuma conta encontrada");
+        }
         return ResponseEntity.ok(contas);
     }
 
-    // Retorna a conta pelo ID [Numero da conta]
+    // Retorna a conta pelo ID [Número da conta]
     @GetMapping("/{numeroConta}")
     public ResponseEntity<?> getConta(@PathVariable String numeroConta) {
         Conta conta = repository.getNumeroConta(numeroConta);
@@ -73,27 +65,40 @@ public class ContaController {
 
     // Faz depósito na conta
     @PutMapping("/deposito")
-    public ResponseEntity<?> deposito(@RequestBody Conta depositoRequest) {
-        Conta conta = repository.getNumeroConta(depositoRequest.getNumeroConta());
+    public ResponseEntity<?> deposito(@RequestBody Map<String, Object> depositoRequest) {
+        String numeroConta = (String) depositoRequest.get("numeroConta");
+        double valor = Double.parseDouble(depositoRequest.get("valor").toString());
+
+        Conta conta = repository.getNumeroConta(numeroConta);
         if (conta == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Conta não encontrada");
         }
-        conta.deposito(depositoRequest.getSaldo());
-        return ResponseEntity.ok(conta);
+
+        try {
+            conta.deposito(valor);
+            return ResponseEntity.ok(conta);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     // Faz saque na conta
     @PutMapping("/saque")
-    public ResponseEntity<?> saque(@RequestBody Conta saqueRequest) {
-        Conta conta = repository.getNumeroConta(saqueRequest.getNumeroConta());
+    public ResponseEntity<?> saque(@RequestBody Map<String, Object> saqueRequest) {
+        String numeroConta = (String) saqueRequest.get("numeroConta");
+        double valor = Double.parseDouble(saqueRequest.get("valor").toString());
+
+        Conta conta = repository.getNumeroConta(numeroConta);
         if (conta == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Conta não encontrada");
         }
-        if (conta.getSaldo() < saqueRequest.getSaldo()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Saldo insuficiente para realizar o saque");
+
+        try {
+            conta.saque(valor);
+            return ResponseEntity.ok(conta);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-        conta.saque(saqueRequest.getSaldo());
-        return ResponseEntity.ok(conta);
     }
 
     // Encerra uma conta
@@ -103,14 +108,16 @@ public class ContaController {
         if (conta == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Conta não encontrada");
         }
-        if (!conta.getAtivo()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("A conta já está encerrada");
+
+        try {
+            conta.encerrarConta();
+            return ResponseEntity.ok(conta);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-        conta.setAtivo(false);
-        return ResponseEntity.ok(conta);
     }
 
-    // Faz pix  [Transferência entre contas]
+    // Faz PIX (transferência entre contas)
     @PostMapping("/pix")
     public ResponseEntity<?> realizarPix(@RequestBody Map<String, Object> pixRequest) {
         String numeroContaOrigem = (String) pixRequest.get("numeroContaOrigem");
@@ -126,13 +133,9 @@ public class ContaController {
         if (contaDestino == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Conta de destino não encontrada");
         }
-        if (contaOrigem.getSaldo() < valor) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Saldo insuficiente para realizar o PIX");
-        }
 
         try {
-            contaOrigem.saque(valor);
-            contaDestino.deposito(valor);
+            contaOrigem.realizarPix(contaDestino, valor);
             return ResponseEntity.ok(contaOrigem);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
