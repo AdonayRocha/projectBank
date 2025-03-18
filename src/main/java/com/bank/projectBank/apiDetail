@@ -16,7 +16,7 @@ Body:
 
 Listar todas contas
 Tipo: GET
-Endpoint: http://localhost:8080/conta
+Endpoint: http://localhost:8080/conta/contas
 
 Detalhes - ID
 Tipo: GET

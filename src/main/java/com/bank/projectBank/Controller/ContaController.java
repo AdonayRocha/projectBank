@@ -34,7 +34,7 @@ public class ContaController {
     }
 
     // Retorna todas as contas
-    @GetMapping("/contas")
+    @GetMapping
     public ResponseEntity<?> getContas() {
         List<Conta> contas = repository.getContas();
         if (contas.isEmpty()) {
