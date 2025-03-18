@@ -15,6 +15,16 @@ O **ProjectBank** é uma aplicação bancária simples desenvolvida em Java util
 - **Encerramento de Conta**: Permite encerrar uma conta existente.
 - **Transferência via PIX**: Permite realizar transferências entre contas utilizando o sistema PIX.
 
+## Solução
+
+O ProjectBank foi desenvolvido com o objetivo de fornecer uma solução simples e eficiente para a gestão de contas bancárias. Utilizando o Spring Boot, conseguimos criar uma aplicação robusta e escalável, que segue os princípios do MVC para separar as responsabilidades de cada camada da aplicação.
+
+### Diferenciais
+
+- **Tratamento de Erros**: A aplicação trata de forma adequada os erros comuns, como conta não encontrada e valores inválidos para operações financeiras, retornando respostas HTTP apropriadas.
+- **Simulação do Sistema PIX**: Implementação do sistema de transferências via PIX, permitindo transações rápidas e seguras entre contas.
+- **Documentação e Código Limpo**: Código bem documentado e organizado, seguindo as melhores práticas de desenvolvimento em Java e Spring Boot.
+
 ## Tecnologias Utilizadas
 
 - Java
